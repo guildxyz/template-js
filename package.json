@@ -3,26 +3,21 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "source": "src",
+  "source": ["src", "app"],
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
-    "dev": "concurrently \"NODE_ENV=development nodemon server.js\" \"tailwindcss -i ./src/App.css -o ./src/tailwind.css --watch\"",
+    "start": "NODE_ENV=production node src/server.js",
+    "dev": "concurrently \"NODE_ENV=development nodemon src/server.js\" \"tailwindcss -i ./app/App.css -o ./app/tailwind.css --watch\"",
     "build": "vite build"
   },
   "dependencies": {
     "axios": "^1.7.7",
-    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "jotai": "^2.10.0",
-    "jsonwebtoken": "^8.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.27.0",
-    "uuid": "^10.0.0",
-    "winston": "^3.15.0",
-    "zod": "^3.23.8"
+    "winston": "^3.15.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.2",

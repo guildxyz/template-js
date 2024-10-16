@@ -3,13 +3,22 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import logger from './src/config/logger.js';
-import routes from './src/routes/routes.js';
+import logger from './config/logger.js';
+import routes from './routes/routes.js';
 
 dotenv.config();
 
+// Configuration
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const config = {
+  port: process.env.PORT || 3000,
+  srcDir: path.join(__dirname, '..', 'app'),
+  distDir: path.join(__dirname, '..', 'dist'),
+  indexHtml: 'index.html'
+};
+
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -23,14 +32,11 @@ app.use('/', routes);
 
 if (process.env.NODE_ENV === 'development') {
   const { createServer: createViteServer } = await import('vite');
-  
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
 
   createViteServer({
     server: { middlewareMode: true },
     appType: 'custom',
-    root: path.join(__dirname, 'src')
+    root: config.srcDir
   }).then(vite => {
     app.use(vite.middlewares);
     
@@ -39,7 +45,7 @@ if (process.env.NODE_ENV === 'development') {
 
       try {
         let template = await vite.transformIndexHtml(url, 
-          fs.readFileSync(path.resolve(__dirname, 'src/index.html'), 'utf-8')
+          fs.readFileSync(path.join(config.srcDir, config.indexHtml), 'utf-8')
         );
         
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
@@ -50,15 +56,12 @@ if (process.env.NODE_ENV === 'development') {
     });
   });
 } else {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  
   // Serve static files from the 'dist' directory
-  app.use(express.static(path.join(__dirname, 'dist')));
+  app.use(express.static(config.distDir));
   
   // Serve index.html for all routes
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(config.distDir, config.indexHtml));
   });
 }
 
@@ -69,8 +72,8 @@ app.use((err, req, res, next) => {
 
 async function startServer() {
   try {    
-    app.listen(port, () => {
-      logger.info(`Server listening at :${port}`);
+    app.listen(config.port, () => {
+      logger.info(`Server listening at :${config.port}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

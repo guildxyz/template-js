@@ -6,3 +6,4 @@ package-lock.json
 combined.log
 error.log
 bun.lockb
+app/tailwind.css
