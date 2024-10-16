@@ -1,5 +1,5 @@
 # template-js
-Template for a Vanilla ECMAScript projects
+Template for ECMAScript projects
 
 # how to use
 ```bun i && bun dev```
