@@ -1,11 +1,18 @@
 # template-js
-Template for ECMAScript projects
+Template for modern ECMAScript projects
 
 # how to use
+I recommend using the [bun](https://bun.sh/) package manager.
 ```bun i && bun dev```
+Otherwise:
+```npm i && npm run dev```
 
-- Following traditional SPA standards
-- Lightweight and simple to use
+# why
+- Simple
+- Lightweight
+- Production ready
+- Following SPA standards
+- Following best practices for rapid web development
 
 Built with:
 - Vite
