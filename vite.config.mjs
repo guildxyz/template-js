@@ -16,13 +16,9 @@ export default defineConfig({
   root: 'app',
   build: {
     outDir: '../dist',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
+    target: 'es2015',
+    cssMinify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -30,6 +26,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
   },
   server: {
     middlewareMode: true
