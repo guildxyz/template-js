@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 import { compression } from 'vite-plugin-compression2'
 import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
+import path from 'path'
 
-export default defineConfig({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     react(),
     compression({
@@ -20,6 +21,9 @@ export default defineConfig({
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
+      input: mode === 'production' 
+        ? path.resolve(__dirname, 'app/entry-client.jsx')
+        : undefined,
       external: ['react', 'react-dom', 'react-router-dom'],
       output: {
         manualChunks: (id) => {
@@ -44,4 +48,4 @@ export default defineConfig({
       ],
     },
   },
-})
+}))
