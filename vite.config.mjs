@@ -20,9 +20,12 @@ export default defineConfig({
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
+      external: ['react', 'react-dom', 'react-router-dom'],
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
