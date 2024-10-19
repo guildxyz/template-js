@@ -13,6 +13,9 @@ Otherwise:
 - Production ready
 - Following SPA standards
 - Following best practices for rapid web development
+- SSR
+- Hot reloading (client and server)
+- Single command development build
 
 Built with:
 - Vite

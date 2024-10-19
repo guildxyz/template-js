@@ -9,3 +9,6 @@ export function render(url, context) {
     </StaticRouter>
   )
 }
+
+// Add this line to ensure the file is treated as an ES module
+export default { render }

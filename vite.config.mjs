@@ -5,7 +5,7 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import path from 'path'
 
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig(({ command, mode, ssrBuild }) => ({
   plugins: [
     react(),
     compression({
@@ -16,19 +16,20 @@ export default defineConfig(({ command, mode }) => ({
   ],
   root: 'app',
   build: {
-    outDir: mode === 'production' ? '../dist/client' : '../dist/server',
+    outDir: ssrBuild ? '../dist/server' : '../dist/client',
     emptyOutDir: true,
     minify: 'esbuild',
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
-      input: mode === 'production' 
-        ? path.resolve(__dirname, 'app/index.html')
-        : path.resolve(__dirname, 'app/entry-server.jsx'),
+      input: ssrBuild 
+        ? path.resolve(__dirname, 'app/entry-server.jsx')
+        : path.resolve(__dirname, 'app/index.html'),
       output: {
-        format: mode === 'production' ? 'es' : 'cjs',
+        format: ssrBuild ? 'cjs' : 'es',
       },
     },
+    ssr: ssrBuild ? './entry-server.jsx' : undefined,
   },
   esbuild: {
     drop: ['console', 'debugger'],

@@ -70,8 +70,8 @@ async function createServer() {
       } else {
         // Production mode
         template = fs.readFileSync(indexPath, 'utf-8');
-        const { render: serverRender } = await import(serverEntryPath);
-        render = serverRender;
+        const serverEntry = await import(serverEntryPath);
+        render = serverEntry.render || serverEntry.default.render;
       }
 
       const appHtml = await render(url);
