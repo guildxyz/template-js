@@ -14,8 +14,8 @@ const Home = () => {
           axios.get('/api/mock/users'),
           axios.get('/api/mock/posts')
         ]);
-        setUsers(usersResponse.data);
-        setPosts(postsResponse.data);
+        setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
+        setPosts(Array.isArray(postsResponse.data) ? postsResponse.data : []);
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch data');
@@ -33,26 +33,34 @@ const Home = () => {
     <div className="space-y-8">
       <section>
         <h2 className="text-2xl font-bold mb-4">Users</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {users.map(user => (
-            <div key={user.id} className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-xl font-semibold">{user.name}</h3>
-              <p className="text-green-300">{user.email}</p>
-            </div>
-          ))}
-        </div>
+        {users.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {users.map(user => (
+              <div key={user.id} className="bg-gray-800 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold">{user.name}</h3>
+                <p className="text-green-300">{user.email}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No users found.</p>
+        )}
       </section>
       <section>
         <h2 className="text-2xl font-bold mb-4">Posts</h2>
-        <div className="space-y-4">
-          {posts.map(post => (
-            <div key={post.id} className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-xl font-semibold">{post.title}</h3>
-              <p className="text-green-300">{post.content}</p>
-              <p className="text-sm text-gray-400 mt-2">Posted by User ID: {post.userId}</p>
-            </div>
-          ))}
-        </div>
+        {posts.length > 0 ? (
+          <div className="space-y-4">
+            {posts.map(post => (
+              <div key={post.id} className="bg-gray-800 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold">{post.title}</h3>
+                <p className="text-green-300">{post.content}</p>
+                <p className="text-sm text-gray-400 mt-2">Posted by User ID: {post.userId}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No posts found.</p>
+        )}
       </section>
     </div>
   );

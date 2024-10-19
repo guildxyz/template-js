@@ -26,6 +26,7 @@ export default defineConfig({
         },
       },
     },
+    ssr: './entry-server.jsx',
   },
   esbuild: {
     drop: ['console', 'debugger'],

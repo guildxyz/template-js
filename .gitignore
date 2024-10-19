@@ -7,3 +7,4 @@ combined.log
 error.log
 bun.lockb
 app/tailwind.css
+public/tailwind.css

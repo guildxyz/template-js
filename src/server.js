@@ -4,11 +4,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from './config/logger.js';
 import routes from './routes/routes.js';
-import fs from 'fs/promises';
+import { createServer as createViteServer } from 'vite';
+import { dirname, resolve } from 'path';
+import fs from 'fs';
+import compression from 'compression';
+import helmet from 'helmet';
 
 dotenv.config();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const config = {
   port: process.env.PORT || 3000,
   srcDir: path.join(__dirname, '..', 'app'),
@@ -16,45 +20,78 @@ const config = {
   indexHtml: 'index.html'
 };
 
-const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 
-app.use(express.json());
-app.use('/', routes);
+async function createServer() {
+  const app = express();
 
-if (process.env.NODE_ENV === 'development') {
-  const { createServer: createViteServer } = await import('vite');
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'custom',
-    root: config.srcDir
-  });
+  // Add compression middleware
+  app.use(compression());
 
-  app.use(vite.middlewares);
-  
+  // Add security headers
+  // app.use(helmet());
+
+  let vite;
+  if (!isProduction) {
+    vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'custom',
+      root: resolve(__dirname, '..')
+    });
+    app.use(vite.middlewares);
+  } else {
+    // Serve static files with caching headers
+    app.use(express.static(path.join(config.distDir, 'client'), {
+      index: false,
+      maxAge: '1d',
+      immutable: true
+    }));
+  }
+
+  app.use('/', routes);
+
   app.use('*', async (req, res, next) => {
     const url = req.originalUrl;
 
+    // Skip SSR for API routes
+    if (url.startsWith('/api/')) {
+      return next();
+    }
+
     try {
-      let template = await fs.readFile(path.join(config.srcDir, 'index.html'), 'utf-8');
-      template = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      let template, render;
+
+      if (!isProduction) {
+        // Development mode
+        template = await vite.transformIndexHtml(url, fs.readFileSync(path.join(config.srcDir, 'index.html'), 'utf-8'));
+        render = (await vite.ssrLoadModule('/app/entry-server.jsx')).render;
+      } else {
+        // Production mode
+        template = fs.readFileSync(path.join(config.distDir, 'client', 'index.html'), 'utf-8');
+        render = (await import('../dist/server/entry-server.js')).render;
+      }
+
+      const appHtml = await render(url);
+
+      const html = template.replace(`<div id="app"></div>`, `<div id="app">${appHtml}</div>`);
+
+      res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
     } catch (e) {
-      vite.ssrFixStacktrace(e);
+      if (!isProduction) {
+        vite.ssrFixStacktrace(e);
+      }
       next(e);
     }
   });
-} else {
-  app.use(express.static(config.distDir));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(config.distDir, config.indexHtml));
+
+  // Serve static files from the public directory with caching
+  app.use(express.static(path.join(__dirname, '..', 'public'), {
+    maxAge: '1d'
+  }));
+
+  app.listen(config.port, () => {
+    logger.info(`Server listening at :${config.port}`);
   });
 }
 
-app.use((err, req, res, next) => {
-  logger.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-app.listen(config.port, () => {
-  logger.info(`Server listening at :${config.port}`);
-});
+createServer();
