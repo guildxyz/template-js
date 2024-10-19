@@ -70,7 +70,7 @@ async function createServer() {
       } else {
         // Production mode
         template = fs.readFileSync(indexPath, 'utf-8');
-        const serverEntry = await import(serverEntryPath);
+        const serverEntry = require(serverEntryPath);
         render = serverEntry.render || serverEntry.default.render;
       }
 
