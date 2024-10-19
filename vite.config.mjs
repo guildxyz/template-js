@@ -4,7 +4,7 @@ import { compression } from 'vite-plugin-compression2'
 import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 
-export default defineConfig({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     react(),
     compression({
@@ -15,12 +15,11 @@ export default defineConfig({
   ],
   root: 'app',
   build: {
-    outDir: '../dist',
+    outDir: mode === 'production' ? '../dist/client' : '../dist/server',
     minify: 'esbuild',
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
-      external: ['react', 'react-dom', 'react-router-dom'],
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
@@ -30,18 +29,15 @@ export default defineConfig({
       },
     },
   },
-  esbuild: {
-    drop: ['console', 'debugger'],
-  },
-  server: {
-    middlewareMode: true
-  },
   css: {
     postcss: {
       plugins: [
-        tailwindcss,
-        autoprefixer,
+        tailwindcss(),
+        autoprefixer(),
       ],
     },
   },
-})
+  ssr: {
+    noExternal: ['react-router-dom'],
+  },
+}))

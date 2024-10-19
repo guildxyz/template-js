@@ -25,10 +25,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 async function createServer() {
   const app = express();
 
-  // Add compression middleware
   app.use(compression());
-
-  // Add security headers
   // app.use(helmet());
 
   let vite;
@@ -40,7 +37,6 @@ async function createServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Serve static files with caching headers
     app.use(express.static(path.join(config.distDir, 'client'), {
       index: false,
       maxAge: '1d',
@@ -53,7 +49,6 @@ async function createServer() {
   app.use('*', async (req, res, next) => {
     const url = req.originalUrl;
 
-    // Skip SSR for API routes
     if (url.startsWith('/api/')) {
       return next();
     }
@@ -62,13 +57,12 @@ async function createServer() {
       let template, render;
 
       if (!isProduction) {
-        // Development mode
         template = await vite.transformIndexHtml(url, fs.readFileSync(path.join(config.srcDir, 'index.html'), 'utf-8'));
         render = (await vite.ssrLoadModule('/app/entry-server.jsx')).render;
       } else {
-        // Production mode
         template = fs.readFileSync(path.join(config.distDir, 'client', 'index.html'), 'utf-8');
-        render = (await import('../dist/server/entry-server.js')).render;
+        const serverEntry = await import('../dist/server/entry-server.js');
+        render = serverEntry.render;
       }
 
       const appHtml = await render(url);
@@ -84,7 +78,6 @@ async function createServer() {
     }
   });
 
-  // Serve static files from the public directory with caching
   app.use(express.static(path.join(__dirname, '..', 'public'), {
     maxAge: '1d'
   }));
