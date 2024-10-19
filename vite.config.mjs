@@ -5,7 +5,7 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import path from 'path'
 
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig({
   plugins: [
     react(),
     compression({
@@ -25,14 +25,6 @@ export default defineConfig(({ command, mode }) => ({
       input: {
         main: path.resolve(__dirname, 'app/index.html'),
       },
-      external: ['react', 'react-dom', 'react-router-dom'],
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-      },
     },
   },
   esbuild: {
@@ -49,4 +41,9 @@ export default defineConfig(({ command, mode }) => ({
       ],
     },
   },
-}))
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './app'),
+    },
+  },
+})
