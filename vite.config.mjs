@@ -16,14 +16,15 @@ export default defineConfig(({ command, mode }) => ({
   ],
   root: 'app',
   build: {
-    outDir: '../dist',
+    outDir: '../dist/client',
+    emptyOutDir: true,
     minify: 'esbuild',
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
-      input: mode === 'production' 
-        ? path.resolve(__dirname, 'app/entry-client.jsx')
-        : undefined,
+      input: {
+        main: path.resolve(__dirname, 'app/index.html'),
+      },
       external: ['react', 'react-dom', 'react-router-dom'],
       output: {
         manualChunks: (id) => {

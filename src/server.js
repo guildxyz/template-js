@@ -21,6 +21,7 @@ const config = {
 };
 
 const isProduction = process.env.NODE_ENV === 'production';
+const indexPath = path.resolve(__dirname, '../dist/client/index.html');
 
 async function createServer() {
   const app = express();
@@ -64,10 +65,10 @@ async function createServer() {
       if (!isProduction) {
         // Development mode
         template = await vite.transformIndexHtml(url, fs.readFileSync(path.join(config.srcDir, 'index.html'), 'utf-8'));
-        render = (await vite.ssrLoadModule('/app/entry-server.jsx')).render;
+        render = (await vite.ssrLoadModule('/entry-server.jsx')).render;
       } else {
         // Production mode
-        template = fs.readFileSync(path.join(config.distDir, 'client', 'index.html'), 'utf-8');
+        template = fs.readFileSync(indexPath, 'utf-8');
         render = (await import('../dist/server/entry-server.js')).render;
       }
 
