@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "concurrently \"NODE_ENV=development nodemon src/server.js\" \"tailwindcss -i ./app/App.css -o ./public/tailwind.css --watch\"",
     "build": "npm run build:client && npm run build:server && npm run build:css",
-    "build:client": "vite build",
+    "build:client": "vite build --mode production",
     "build:server": "vite build --ssr entry-server.jsx --outDir dist/server",
     "build:css": "tailwindcss -i ./app/App.css -o ./dist/client/tailwind.css",
     "start": "NODE_ENV=production node src/server.js"

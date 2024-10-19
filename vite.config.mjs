@@ -5,7 +5,7 @@ import tailwindcss from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import path from 'path'
 
-export default defineConfig({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     react(),
     compression({
@@ -16,14 +16,17 @@ export default defineConfig({
   ],
   root: 'app',
   build: {
-    outDir: '../dist/client',
+    outDir: mode === 'production' ? '../dist/client' : '../dist/server',
     emptyOutDir: true,
     minify: 'esbuild',
     target: 'es2015',
     cssMinify: 'esbuild',
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'app/index.html'),
+      input: mode === 'production' 
+        ? path.resolve(__dirname, 'app/index.html')
+        : path.resolve(__dirname, 'app/entry-server.jsx'),
+      output: {
+        format: mode === 'production' ? 'es' : 'cjs',
       },
     },
   },
@@ -46,4 +49,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './app'),
     },
   },
-})
+}))

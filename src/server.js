@@ -12,7 +12,7 @@ import helmet from 'helmet';
 
 dotenv.config();
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const config = {
   port: process.env.PORT || 3000,
   srcDir: path.join(__dirname, '..', 'app'),
@@ -22,6 +22,7 @@ const config = {
 
 const isProduction = process.env.NODE_ENV === 'production';
 const indexPath = path.resolve(__dirname, '../dist/client/index.html');
+const serverEntryPath = path.resolve(__dirname, '../dist/server/entry-server.js');
 
 async function createServer() {
   const app = express();
@@ -69,7 +70,8 @@ async function createServer() {
       } else {
         // Production mode
         template = fs.readFileSync(indexPath, 'utf-8');
-        render = (await import('../dist/server/entry-server.js')).render;
+        const { render: serverRender } = await import(serverEntryPath);
+        render = serverRender;
       }
 
       const appHtml = await render(url);
@@ -78,6 +80,7 @@ async function createServer() {
 
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
     } catch (e) {
+      console.error(e);
       if (!isProduction) {
         vite.ssrFixStacktrace(e);
       }
